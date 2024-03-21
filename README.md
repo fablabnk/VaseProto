@@ -11,10 +11,13 @@ This guide presumes you are using VSCode as your editor
 ## 1. Install VCV Rack, the Rack SDK and Daisy SP
 
 For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is ~/Documents/SynthLab and it looks as follows:
+
+```
 .
 ├── DaisySP : digital signal processing code for the Daisy platform
 ├── Rack2Free : VCV Rack itself
 └── Rack-SDK : the Rack Software Development Kit
+```
 
 For the second two items, we can follow the VCV Rack [plugin development tutorial](https://vcvrack.com/manual/PluginDevelopmentTutorial), which is recommended to complete anyway to get a feeling for how VCV rack plugins work and are built.
 

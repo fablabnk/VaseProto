@@ -89,11 +89,19 @@ Here, `make` builds the plugin, `make dist` makes a distributable version and `m
 
 in Makefile:
 - Point correctly to source code in DaisySP folder (one folder up):
-`DAISYSP_DIR = ../DaisySP`
+```
+DAISYSP_DIR = ../DaisySP
+```
 - point the compiler to the header files `daisysp.h` and `dsp.h`:
-`CXXFLAGS += -I$(DAISYSP_DIR)/Source -I$(DAISYSP_DIR)/Source/Utility`
+```
+CXXFLAGS += -I$(DAISYSP_DIR)/Source -I$(DAISYSP_DIR)/Source/Utility
+```
 - commented out the -ldaisysp flag here (I could never find what it's trying to link to here)
-`LDFLAGS += -L$(DAISYSP_DIR)/build # -ldaisysp`
+```
+LDFLAGS += -L$(DAISYSP_DIR)/build # -ldaisysp
+```
 - added this line to include all the DaisySP source files (probably a bit overkill)
-`SOURCES += ${wildcard $(DAISYSP_DIR)/Source/**/*.cpp}`
+```
+SOURCES += ${wildcard $(DAISYSP_DIR)/Source/**/*.cpp}
+```
 

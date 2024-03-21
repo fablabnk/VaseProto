@@ -1,14 +1,14 @@
 This is a fork of [VaseProto](https://github.com/stephenhensley/VaseProto), updated to make work with the latest version of VCV Rack.
 
-- Its purpose is to build a simple sine wave oscillator plugin for VCV Rack using DaisySP code.
-- This template can then be used as a development environment to prototype more complex modules without the Daisy hardware.
-- We are using this approach for our SynthLab sessions in the [42 Berlin FabLab](https://workish.berlin/fablab) to prototype our first hardware Eurorack module.
+- Its purpose is to build a simple sine wave oscillator plugin for VCV Rack using DaisySP code
+- This template can then be used as a development environment to prototype more complex modules without the Daisy hardware
+- We are using this approach for our SynthLab sessions in the [42 Berlin FabLab](https://workish.berlin/fablab) to prototype our first hardware Eurorack module
 
 # Prerequisites
 
-This guide presumes you are using VSCode as your editor.
+This guide presumes you are using VSCode as your editor
 
-1. Installation of VCV Rack, the Rack SDK and Daisy SP
+## 1. Install VCV Rack, the Rack SDK and Daisy SP
 
 For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is ~/Documents/SynthLab and it looks as follows:
 .
@@ -20,7 +20,7 @@ For the second two items, we can follow the VCV Rack [plugin development tutoria
 
 For the DaisySP we can simply clone [the repo](https://github.com/electro-smith/DaisySP) into our project folder
 
-2. Build DaisySP
+## 2. Build DaisySP
 
 Now we need to build DaisySP itself:
 
@@ -29,7 +29,7 @@ Now we need to build DaisySP itself:
 
 This will create the `build` folder needed by our plugin code
 
-3. Export the path to your Rack-SDK
+## 3. Export the path to your Rack-SDK
 
 In the VSCode terminal, navigate into the Rack-SDK folder within your project folder
 

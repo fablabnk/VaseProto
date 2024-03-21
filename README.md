@@ -10,7 +10,7 @@ This guide presumes you are using VSCode as your editor
 
 ## 1. Install VCV Rack, the Rack SDK and Daisy SP
 
-For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is ~/Documents/SynthLab and it looks as follows:
+For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is `~/Documents/SynthLab` and it looks as follows:
 
 ```
 .
@@ -19,7 +19,7 @@ For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be insta
 └── Rack-SDK : the Rack Software Development Kit
 ```
 
-For the second two items, we can follow the VCV Rack [plugin development tutorial](https://vcvrack.com/manual/PluginDevelopmentTutorial), which is recommended to complete anyway to get a feeling for how VCV rack plugins work and are built.
+For the second two items, we can follow the VCV Rack [plugin development tutorial](https://vcvrack.com/manual/PluginDevelopmentTutorial), which is recommended to do anyway to get a feeling for how plugins work and are built.
 
 For the DaisySP we can simply clone [the repo](https://github.com/electro-smith/DaisySP) into our project folder
 
@@ -27,8 +27,10 @@ For the DaisySP we can simply clone [the repo](https://github.com/electro-smith/
 
 Now we need to build DaisySP itself:
 
-`cd DaisySP`
-`make`
+```
+cd DaisySP
+make
+```
 
 This will create the `build` folder needed by our plugin code
 
@@ -36,10 +38,14 @@ This will create the `build` folder needed by our plugin code
 
 In the VSCode terminal, navigate into the Rack-SDK folder within your project folder
 
-`cd ~/Documents/SynthLab/Rack-SDK`
-`pwd`
+```
+cd ~/Documents/SynthLab/Rack-SDK
+pwd
+```
 copy the resulting path and paste it as follows
-`export RACK_DIR="/path/to/your/rack/sdk/"`
+```
+export RACK_DIR="/path/to/your/rack/sdk/"
+```
 
 This command needs to be run each time you open the project in VSCode, or should be added to your ~/.bashrc file.
 
@@ -52,18 +58,25 @@ Now we are ready to ahead and build the plugin. In your project folder, clone th
 `git clone https://github.com/fablabnk/VaseProtoPlugin.git`
 
 Your folder structure should now look like this:
+
+```
 .
 ├── Rack2Free
 ├── Rack-SDK
 ├── DaisySP
 └── VaseProtoPlugin
+```
 
 Now you can go ahead an try to build...
 
-`cd VaseProtoPlugin`
-`make` - builds the plugin
-`make dist` - makes a distributable version`
-`make install` - places it in your VCV Rack plugins folder in ~/.Rack2`
+```
+cd VaseProtoPlugin
+make
+make dist
+make install
+```
+
+Here, `make` builds the plugin, `make dist` makes a distributable version and `make install` places it in your VCV Rack plugins folder in ~/.Rack2
 
 # Things still to improve
 

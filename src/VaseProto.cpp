@@ -1,6 +1,9 @@
 #include "plugin.hpp"
 #include "daisysp.h"
 
+#define MAX_DELAY static_cast<size_t>(48000 * 0.75f)
+
+using namespace daisysp;
 
 struct VaseProto : Module {
 	enum ParamIds {
@@ -8,11 +11,11 @@ struct VaseProto : Module {
 		NUM_PARAMS
 	};
 	enum InputIds {
-		PITCH_INPUT,
+		AUDIO_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		SINE_OUTPUT,
+		AUDIO_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -22,36 +25,22 @@ struct VaseProto : Module {
 
 	VaseProto() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(PITCH_PARAM, 0.f, 1.f, 0.f, "");
-		// TODO: Figure out if there's a way to do SR check during
-		//       construction
-        //osc.Init(args.sampleRate);
-
-		// Init the DaisySP Oscillator
-		osc.Init(44100.f);
-        osc.SetAmp(5.0f);
+        // args.sampleRate;
 	}
 
 	void process(const ProcessArgs& args) override {
-	    // Get pitch -- taken from plugin guide
-	    float pitch = params[PITCH_PARAM].getValue();
-	    pitch += inputs[PITCH_INPUT].getVoltage();
-	    pitch = clamp(pitch, -4.f, 4.f);
-	    // Default pitch is C4 - 261.6256Hz
-	    float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);
-
-        // Set Freq, and output.
-	    osc.SetFreq(freq);
-	    outputs[SINE_OUTPUT].setVoltage(osc.Process());
-
-	    blinkPhase += args.sampleTime;
-	    if (blinkPhase >= 1.f)
-	        blinkPhase -= 1.f;
-	    lights[BLINK_LIGHT].setBrightness(blinkPhase < .5f ? 1.f : 0.f);
+		float feedback, del_out, sig_out;
+        del_out = del.Read();
+        sig_out  = del_out + inputs[AUDIO_INPUT].getVoltage();
+        feedback = (del_out * 0.75f) + inputs[AUDIO_INPUT].getVoltage();
+        del.Write(feedback);
+		outputs[AUDIO_OUTPUT].setVoltage(sig_out);
 	}
 
-	daisysp::Oscillator osc;
-	float blinkPhase;
+    // for(size_t i = 0; i < size; i += 2)
+    // {
+    // }
+	static DelayLine<float, MAX_DELAY> del;
 };
 
 
@@ -65,13 +54,13 @@ struct VaseProtoWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(15.24, 46.063)), module, VaseProto::PITCH_PARAM));
+		// addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(15.24, 46.063)), module, VaseProto::PITCH_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, VaseProto::PITCH_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, VaseProto::AUDIO_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, VaseProto::SINE_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, VaseProto::AUDIO_OUTPUT));
 
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(15.24, 25.81)), module, VaseProto::BLINK_LIGHT));
+		// addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(15.24, 25.81)), module, VaseProto::BLINK_LIGHT));
 	}
 };
 

@@ -25,8 +25,11 @@ For the DaisySP we can simply clone [the repo](https://github.com/electro-smith/
 
 ## 2. Build DaisySP
 
-Now we need to build DaisySP itself:
+Now we need to build DaisySP itself. To do this you will first have to install the arm compiler `arm-none-eabi` for your respective platform: GNU/Linux, Windows or macOS
 
+https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+
+Once installed, you should be able to build DaisySP as follows
 ```
 cd DaisySP
 make

@@ -1,110 +1,83 @@
-This is a fork of [VaseProto](https://github.com/stephenhensley/VaseProto), updated to make work with the latest version of VCV Rack.
+This is a simple delay line build as a plugin for VCVRack using the DaisySP library. It is a first step towards prototyping a Daisy seed based audio processing Eurorack module.
 
-- Its purpose is to build a simple sine wave oscillator plugin for VCV Rack using DaisySP code
-- This template can then be used as a development environment to prototype more complex modules without the Daisy hardware
-- We are using this approach for our SynthLab sessions in the [42 Berlin FabLab](https://workish.berlin/fablab) to prototype our first hardware Eurorack module
+# Things I learned building this module
 
-# Prerequisites
+I learned much more about the general structure of the plugin code in `DelayProto.cpp`, including how to declare the four categories of elements that make up a plugin:
 
-This guide presumes you are using VSCode as your editor
+- parameters
+- input
+- output
+- lights
 
-## 1. Install VCV Rack, the Rack SDK and Daisy SP
+1. Module declaration
 
-For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is `~/Documents/SynthLab` and it looks as follows:
-
-```
-.
-├── DaisySP : digital signal processing code for the Daisy platform
-├── Rack2Free : VCV Rack itself
-└── Rack-SDK : the Rack Software Development Kit
-```
-
-For the second two items, we can follow the VCV Rack [plugin development tutorial](https://vcvrack.com/manual/PluginDevelopmentTutorial), which is recommended to do anyway to get a feeling for how plugins work and are built.
-
-For the DaisySP we can simply clone [the repo](https://github.com/electro-smith/DaisySP) into our project folder
-
-## 2. Build DaisySP
-
-Now we need to build DaisySP itself. To do this you will first have to install the arm compiler `arm-none-eabi` for your respective platform: GNU/Linux, Windows or macOS
-
-https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
-
-Once installed, you should be able to build DaisySP as follows
-```
-cd DaisySP
-make
-```
-
-This will create the `build` folder needed by our plugin code
-
-## 3. Export the path to your Rack-SDK
-
-In the VSCode terminal, navigate into the Rack-SDK folder within your project folder
+In `struct DelayProto : Module`, all four element categories must be provided, but we can leave some of them blank, by just ending them with NUM_xxx e.g.
 
 ```
-cd ~/Documents/SynthLab/Rack-SDK
-pwd
-```
-copy the resulting path and paste it as follows
-```
-export RACK_DIR="/path/to/your/rack/sdk/"
-```
-
-This command needs to be run each time you open the project in VSCode, or should be added to your ~/.bashrc file.
-
-Q: Is there a way to do this just for a single VS code project?
-
-# Building the Plugin
-
-Now we are ready to ahead and build the plugin. In your project folder, clone this repo as follows:
-
-`git clone https://github.com/fablabnk/VaseProtoPlugin.git`
-
-Your folder structure should now look like this:
-
-```
-.
-├── Rack2Free
-├── Rack-SDK
-├── DaisySP
-└── VaseProtoPlugin
+	enum ParamIds {
+		NUM_PARAMS
+	};
+	enum InputIds {
+		AUDIO_INPUT,
+		NUM_INPUTS
+	};
+	enum OutputIds {
+		AUDIO_OUTPUT,
+		NUM_OUTPUTS
+	};
+	enum LightIds {
+		NUM_LIGHTS
+	};
 ```
 
-Now you can go ahead an try to build...
+2. Constructor
+
+In `DelayProto()`, we must always reference the four elements:
+`config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);`
+
+3. User Interface
+
+The `struct DelayProtoWidget : ModuleWidget` represents the user interface. Here we just add the elements we use...
 
 ```
-cd VaseProtoPlugin
-make
-make dist
-make install
+addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, DelayProto::AUDIO_INPUT));
+addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, DelayProto::AUDIO_OUTPUT));
 ```
 
-Here, `make` builds the plugin, `make dist` makes a distributable version and `make install` places it in your VCV Rack plugins folder in ~/.Rack2
+## Namespaces
 
-# Things still to improve
+We can reference our DaisySP code with or without a namespace.
 
-- scratchy audio in VCV Rack (sometimes fixes itself)
-- the compilation processes builds a lot more stuff that it needs to, so it's slow - optimise it
+### With a namespace
 
-# Technical details: What I updated to make it work
-
-- updated plugin.json to "version": "2.4.1" (probably not necessary but nice)
-
-in Makefile:
-- Point correctly to source code in DaisySP folder (one folder up):
+For example by including...
 ```
-DAISYSP_DIR = ../DaisySP
-```
-- point the compiler to the header files `daisysp.h` and `dsp.h`:
-```
-CXXFLAGS += -I$(DAISYSP_DIR)/Source -I$(DAISYSP_DIR)/Source/Utility
-```
-- commented out the -ldaisysp flag here (I could never find what it's trying to link to here)
-```
-LDFLAGS += -L$(DAISYSP_DIR)/build # -ldaisysp
-```
-- added this line to include all the DaisySP source files (probably a bit overkill)
-```
-SOURCES += ${wildcard $(DAISYSP_DIR)/Source/**/*.cpp}
+using namespace daisysp;
 ```
 
+...before our module declaration ```struct DelayProto : Module```
+
+### Without a namespace (chose this approach for now)
+
+```
+daisysp::DelayLine<float, MAX_DELAY> del;
+```
+
+### We don't need to wrap our processing code in a for loop representing the audio block size
+
+Instead it's okay to process a single sample each time void process is called
+
+### Use of static
+
+We don't use it:
+
+```
+	// static DelayLine<float, MAX_DELAY> del;
+	daisysp::DelayLine<float, MAX_DELAY> del;
+```
+
+### Deriving the sample rate
+
+We don't do that yet, our delay is hard coded to 48000Hz:
+
+#define MAX_DELAY static_cast<size_t>(48000 * 0.75f)

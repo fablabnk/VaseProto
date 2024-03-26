@@ -1,20 +1,18 @@
-# If RACK_DIR is not defined when calling the Makefile, default to two directories above
-RACK_DIR ?= ../..
-
+RACK_DIR ?= ../Rack-SDK
 DAISYSP_DIR = ../DaisySP
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS +=
 CFLAGS +=
-CXXFLAGS += -I$(DAISYSP_DIR)/Source -I$(DAISYSP_DIR)/Source/Utility
+CXXFLAGS += -I$(DAISYSP_DIR)/Source
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
-LDFLAGS += -L$(DAISYSP_DIR)/build # -ldaisysp
+LDFLAGS += -L$(DAISYSP_DIR)/ -lDaisySP
 
 # Add .cpp files to the build
-SOURCES += $(wildcard src/*.cpp)
-SOURCES += ${wildcard $(DAISYSP_DIR)/Source/**/*.cpp}
+SOURCES += ./src/plugin.cpp
+SOURCES += ./src/DelayProto.cpp
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
@@ -23,3 +21,10 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
+
+clean_extra:
+	rm -rf DaisySP
+
+clean: clean_extra
+
+.PHONY: clean

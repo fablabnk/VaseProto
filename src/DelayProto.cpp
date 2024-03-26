@@ -3,11 +3,8 @@
 
 #define MAX_DELAY static_cast<size_t>(48000 * 0.75f)
 
-using namespace daisysp;
-
-struct VaseProto : Module {
+struct DelayProto : Module {
 	enum ParamIds {
-		PITCH_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -19,11 +16,10 @@ struct VaseProto : Module {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		BLINK_LIGHT,
 		NUM_LIGHTS
 	};
 
-	VaseProto() {
+	DelayProto() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // args.sampleRate;
 	}
@@ -36,33 +32,24 @@ struct VaseProto : Module {
         del.Write(feedback);
 		outputs[AUDIO_OUTPUT].setVoltage(sig_out);
 	}
-
-    // for(size_t i = 0; i < size; i += 2)
-    // {
-    // }
-	static DelayLine<float, MAX_DELAY> del;
+	// static DelayLine<float, MAX_DELAY> del;
+	daisysp::DelayLine<float, MAX_DELAY> del;
 };
 
 
-struct VaseProtoWidget : ModuleWidget {
-	VaseProtoWidget(VaseProto* module) {
+struct DelayProtoWidget : ModuleWidget {
+	DelayProtoWidget(DelayProto* module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/VaseProto.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DelayProto.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
-		// addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(15.24, 46.063)), module, VaseProto::PITCH_PARAM));
-
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, VaseProto::AUDIO_INPUT));
-
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, VaseProto::AUDIO_OUTPUT));
-
-		// addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(15.24, 25.81)), module, VaseProto::BLINK_LIGHT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, DelayProto::AUDIO_INPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, DelayProto::AUDIO_OUTPUT));
 	}
 };
 
 
-Model* modelVaseProto = createModel<VaseProto, VaseProtoWidget>("VaseProto");
+Model* modelDelayProto = createModel<DelayProto, DelayProtoWidget>("DelayProto");

@@ -1,11 +1,11 @@
 {
-  "slug": "VaseProtoPlugin",
-  "name": "VaseProtoPlugin",
+  "slug": "DelayProtoPlugin",
+  "name": "DelayProtoPlugin",
   "version": "2.4.1",
   "license": "MIT",
   "brand": "ES",
-  "author": "Stephen Hensley",
-  "authorEmail": "shensley.audio@gmail.com",
+  "author": "Graham Booth",
+  "authorEmail": "graham@42berlin.de",
   "authorUrl": "",
   "pluginUrl": "",
   "manualUrl": "",
@@ -14,11 +14,11 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "VaseProto",
-      "name": "VaseProtoOsc",
-      "description": "Simple DaisySP Oscillator",
+      "slug": "DelayProto",
+      "name": "DelayProto",
+      "description": "Simple DaisySP Delay Line",
       "tags": [
-        "oscillator"
+        "delay"
       ]
     }
   ]

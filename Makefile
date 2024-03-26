@@ -22,6 +22,11 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
+plugin:
+	make
+	make dist
+	make install
+
 clean_extra:
 	rm -rf DaisySP
 

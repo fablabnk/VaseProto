@@ -21,7 +21,6 @@ struct DelayProto : Module {
 
 	DelayProto() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        // args.sampleRate;
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -32,7 +31,6 @@ struct DelayProto : Module {
         del.Write(feedback);
 		outputs[AUDIO_OUTPUT].setVoltage(sig_out);
 	}
-	// static DelayLine<float, MAX_DELAY> del;
 	daisysp::DelayLine<float, MAX_DELAY> del;
 };
 

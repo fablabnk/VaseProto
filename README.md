@@ -1,3 +1,5 @@
+Note: This branch is an intro to creating a simple plugin using DaisySP code. Check the other branches for more advanced examples (delay lines etc)
+
 This is a fork of [VaseProto](https://github.com/stephenhensley/VaseProto), which has been updated to work with the latest version of VCV Rack.
 
 - Its purpose is to build a simple sine wave oscillator plugin for VCV Rack using DaisySP code

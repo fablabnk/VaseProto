@@ -9,7 +9,7 @@ See [here](https://github.com/fablabnk/VaseProtoPlugin/tree/delay_line) for vers
 
 # Still To Do
 
-- figure out why auto panel generation didn't work
+- figure out why auto panel generation didn't work 
 - implement delay-time switch
 - smooth knob values (i.e. delay time over a period of 0.5 seconds)
 - how to derive the sample rate from VCV Rack rather than hard coding it (to 48000)

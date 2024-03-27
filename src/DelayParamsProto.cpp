@@ -56,7 +56,9 @@ struct DelayParamsProto : Module {
 		del.SetDelay(SAMPLE_RATE * delayTime);
         del_out = del.Read();
         sig_out  = del_out + inputs[AUDIO_INPUT].getVoltage();
+
 		// 2. feedback amount (0 - 0.75)
+
 		float paramTwo = params[PARAM_TWO_PARAM].getValue() + (inputs[PARAM_TWO_CV_INPUT].getVoltage() / 5.0f);
 		float clampedParamTwo = clamp(paramTwo, 0.f, 1.f);
         feedback = (del_out * clampedParamTwo) + inputs[AUDIO_INPUT].getVoltage();

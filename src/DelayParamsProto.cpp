@@ -1,5 +1,4 @@
 #include <iostream>
-#include <algorithm>
 #include "plugin.hpp"
 #include "daisysp.h"
 
@@ -11,10 +10,11 @@ template<typename T>
 const T& clamp(const T& value, const T& low, const T& high) {
     return (value < low) ? low : (value > high) ? high : value;
 }
+
 struct DelayParamsProto : Module {
 	enum ParamId {
-		PARAM_ONE_PARAM,
-		PARAM_TWO_PARAM,
+		PARAM_ONE,
+		PARAM_TWO,
 		PARAMS_LEN
 	};
 	enum InputId {
@@ -31,11 +31,10 @@ struct DelayParamsProto : Module {
 		LIGHTS_LEN
 	};
 
-
 	DelayParamsProto() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(PARAM_ONE_PARAM, 0.f, 1.f, 1.f, "Delay Time (secs)");
-		configParam(PARAM_TWO_PARAM, 0.f, 1.f, 1.f, "Feedback");
+		configParam(PARAM_ONE, 0.f, 1.f, 1.f, "Delay Time (secs)");
+		configParam(PARAM_TWO, 0.f, 1.f, 1.f, "Feedback");
 		configInput(PARAM_ONE_CV_INPUT, "Delay Time CV Input");
 		configInput(PARAM_TWO_CV_INPUT, "Feedback CV Input");
 		configInput(AUDIO_INPUT, "Audio In");
@@ -44,31 +43,28 @@ struct DelayParamsProto : Module {
 
 	void process(const ProcessArgs& args) override {
 		float feedback, del_out, sig_out;
-		
-		;
-		// the two params will be
-		// 1. delay time
-		// add param input to cv input and clip between 0 and 1
-		float paramOne = params[PARAM_ONE_PARAM].getValue() + (inputs[PARAM_ONE_CV_INPUT].getVoltage() / 5.0f);
+
+		// Parameter 1: Delay Time (secs)
+		float paramOne = params[PARAM_ONE].getValue() + (inputs[PARAM_ONE_CV_INPUT].getVoltage() / 5.0f);
 		float clampedParamOne = clamp(paramOne, 0.f, 1.f);
 		float rangeDelayTimeSecs = maxDelayTimeSecs - minDelayTimeSecs;
 		float delayTime = (clampedParamOne * rangeDelayTimeSecs) + minDelayTimeSecs;
 		del.SetDelay(SAMPLE_RATE * delayTime);
+
         del_out = del.Read();
         sig_out  = del_out + inputs[AUDIO_INPUT].getVoltage();
 
-		// 2. feedback amount (0 - 0.75)
-
-		float paramTwo = params[PARAM_TWO_PARAM].getValue() + (inputs[PARAM_TWO_CV_INPUT].getVoltage() / 5.0f);
+		// Parameter 2: Feedback
+		float paramTwo = params[PARAM_TWO].getValue() + (inputs[PARAM_TWO_CV_INPUT].getVoltage() / 5.0f);
 		float clampedParamTwo = clamp(paramTwo, 0.f, 1.f);
         feedback = (del_out * clampedParamTwo) + inputs[AUDIO_INPUT].getVoltage();
         del.Write(feedback);
+
 		outputs[AUDIO_OUTPUT].setVoltage(sig_out);
 	}
 	daisysp::DelayLine<float, MAX_DELAY> del;
 	float minDelayTimeSecs = 0.1, maxDelayTimeSecs = 1.0;
 };
-
 
 struct DelayParamsProtoWidget : ModuleWidget {
 	DelayParamsProtoWidget(DelayParamsProto* module) {
@@ -80,8 +76,8 @@ struct DelayParamsProtoWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.23, 37.3)), module, DelayParamsProto::PARAM_ONE_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.102, 61.5)), module, DelayParamsProto::PARAM_TWO_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.23, 37.3)), module, DelayParamsProto::PARAM_ONE));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.102, 61.5)), module, DelayParamsProto::PARAM_TWO));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(23.635, 37.3)), module, DelayParamsProto::PARAM_ONE_CV_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(23.507, 61.5)), module, DelayParamsProto::PARAM_TWO_CV_INPUT));

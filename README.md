@@ -7,6 +7,8 @@ See [here](https://github.com/fablabnk/VaseProtoPlugin/tree/delay_line) for vers
 - It is a first step towards prototyping a Daisy seed-based audio processing Eurorack module.
 - The code is based on the Daisy example [here](https://github.com/electro-smith/DaisyExamples/blob/master/seed/DSP/delayline/delayline.cpp), but with the oscillator and envelope stripped out to create a simple fixed-length delay.
 
+I added a convenience target to the Makefile `make plugin` which does `make`, `make dist` and `make install` together.
+
 # Still To Do
 
 - figure out why auto panel generation didn't work 

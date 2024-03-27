@@ -1,6 +1,6 @@
 {
-  "slug": "DelayProtoPlugin",
-  "name": "DelayProtoPlugin",
+  "slug": "DelayParamsProtoPlugin",
+  "name": "DelayParamsProtoPlugin",
   "version": "2.4.1",
   "license": "MIT",
   "brand": "ES",
@@ -14,8 +14,8 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "DelayProto",
-      "name": "DelayProto",
+      "slug": "DelayParamsProto",
+      "name": "DelayParamsProto",
       "description": "Simple DaisySP Delay Line",
       "tags": [
         "delay"

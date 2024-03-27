@@ -3,7 +3,7 @@
 
 #define MAX_DELAY static_cast<size_t>(48000 * 0.75f)
 
-struct DelayProto : Module {
+struct DelayParamsProto : Module {
 	enum ParamIds {
 		NUM_PARAMS
 	};
@@ -19,7 +19,7 @@ struct DelayProto : Module {
 		NUM_LIGHTS
 	};
 
-	DelayProto() {
+	DelayParamsProto() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	}
 
@@ -35,19 +35,19 @@ struct DelayProto : Module {
 };
 
 
-struct DelayProtoWidget : ModuleWidget {
-	DelayProtoWidget(DelayProto* module) {
+struct DelayParamsProtoWidget : ModuleWidget {
+	DelayParamsProtoWidget(DelayParamsProto* module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DelayProto.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DelayParamsProto.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, DelayProto::AUDIO_INPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, DelayProto::AUDIO_OUTPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, DelayParamsProto::AUDIO_INPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, DelayParamsProto::AUDIO_OUTPUT));
 	}
 };
 
 
-Model* modelDelayProto = createModel<DelayProto, DelayProtoWidget>("DelayProto");
+Model* modelDelayParamsProto = createModel<DelayParamsProto, DelayParamsProtoWidget>("DelayParamsProto");

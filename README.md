@@ -10,7 +10,7 @@ I added a convenience target to the Makefile `make plugin` which does `make`, `m
 
 ## Plugin Element Categories
 
-I learned more about the general structure of the plugin code in `DelayProto.cpp`, including how to declare the four categories of elements that make up a plugin:
+I learned more about the general structure of the plugin code in `DelayParamsProto.cpp`, including how to declare the four categories of elements that make up a plugin:
 
 - parameters
 - input
@@ -19,7 +19,7 @@ I learned more about the general structure of the plugin code in `DelayProto.cpp
 
 1. Module declaration
 
-In `struct DelayProto : Module`, all four element categories must be provided, but we can leave some of them blank, by just ending them with NUM_xxx e.g.
+In `struct DelayParamsProto : Module`, all four element categories must be provided, but we can leave some of them blank, by just ending them with NUM_xxx e.g.
 
 ```
 	enum ParamIds {
@@ -40,16 +40,16 @@ In `struct DelayProto : Module`, all four element categories must be provided, b
 
 2. Constructor
 
-In `DelayProto()`, we must always reference the four elements:
+In `DelayParamsProto()`, we must always reference the four elements:
 `config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);`
 
 3. User Interface
 
-The `struct DelayProtoWidget : ModuleWidget` represents the user interface. Here we just add the elements we actually use...
+The `struct DelayParamsProtoWidget : ModuleWidget` represents the user interface. Here we just add the elements we actually use...
 
 ```
-addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, DelayProto::AUDIO_INPUT));
-addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, DelayProto::AUDIO_OUTPUT));
+addInput(createInputCentered<PJ301MPort>(mm2px(Vec(15.24, 77.478)), module, DelayParamsProto::AUDIO_INPUT));
+addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(15.24, 108.713)), module, DelayParamsProto::AUDIO_OUTPUT));
 ```
 
 ## Namespaces
@@ -62,7 +62,7 @@ We can reference our DaisySP code with or without a namespace.
 daisysp::DelayLine<float, MAX_DELAY> del;
 ```
 
-2. With a namespace. For example by including the following line before our module declaration ```struct DelayProto : Module```
+2. With a namespace. For example by including the following line before our module declaration ```struct DelayParamsProto : Module```
 ```
 using namespace daisysp;
 ```
@@ -99,7 +99,7 @@ According to ChatGPT we could derive the sample rate by using `rack::engineGetSa
 Also ChatGPT is wrong
 
 ```
-src/DelayProto.cpp:26:23: error: ‘engineGetSampleRate’ is not a member of ‘rack’
+src/DelayParamsProto.cpp:26:23: error: ‘engineGetSampleRate’ is not a member of ‘rack’
    26 |                 rack::engineGetSampleRate();
 ```
 

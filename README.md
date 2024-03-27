@@ -1,4 +1,4 @@
-This is a fork of [VaseProto](https://github.com/stephenhensley/VaseProto), updated to make work with the latest version of VCV Rack.
+This is a fork of [VaseProto](https://github.com/stephenhensley/VaseProto), which has been updated to work with the latest version of VCV Rack.
 
 - Its purpose is to build a simple sine wave oscillator plugin for VCV Rack using DaisySP code
 - This template can then be used as a development environment to prototype more complex modules without the Daisy hardware
@@ -6,11 +6,9 @@ This is a fork of [VaseProto](https://github.com/stephenhensley/VaseProto), upda
 
 # Prerequisites
 
-This guide presumes you are using VSCode as your editor
+## 1. Install VCV Rack and the Rack SDK
 
-## 1. Install VCV Rack, the Rack SDK and Daisy SP
-
-For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is `~/Documents/SynthLab` and it looks as follows:
+For our plugin to compile, we need VCV Rack, the Rack SDK and Daisy SP to be installed in a project folder. In my case this is `~/Documents/SynthLab` and it looks as follows:
 
 ```
 .
@@ -19,41 +17,22 @@ For the plugin to build, we need VCV Rack, the Rack SDK and Daisy SP to be insta
 └── Rack-SDK : the Rack Software Development Kit
 ```
 
-For the second two items, we can follow the VCV Rack [plugin development tutorial](https://vcvrack.com/manual/PluginDevelopmentTutorial), which is recommended to do anyway to get a feeling for how plugins work and are built.
+For the second two items, we can follow the VCV Rack [plugin development tutorial](https://vcvrack.com/manual/PluginDevelopmentTutorial), which is recommended to get a feeling for how plugins work and are built.
 
-For the DaisySP we can simply clone [the repo](https://github.com/electro-smith/DaisySP) into our project folder
+## 2. Download and Build DaisySP
 
-## 2. Build DaisySP
-
-Now we need to build DaisySP itself:
+To install DaisySP we can simply clone [the repo](https://github.com/electro-smith/DaisySP) into our project folder and build it. When using the Daisy hardware directly we would install the `arm-none-eabi` compiler and compile for the arm architecture by simply typing `make`. However when making a plugin we want to build for our local architecture. For this we first use cmake, as follows:
 
 ```
-cd DaisySP
+cmake .
 make
 ```
 
-This will create the `build` folder needed by our plugin code
-
-## 3. Export the path to your Rack-SDK
-
-In the VSCode terminal, navigate into the Rack-SDK folder within your project folder
-
-```
-cd ~/Documents/SynthLab/Rack-SDK
-pwd
-```
-copy the resulting path and paste it as follows
-```
-export RACK_DIR="/path/to/your/rack/sdk/"
-```
-
-This command needs to be run each time you open the project in VSCode, or should be added to your ~/.bashrc file.
-
-Q: Is there a way to do this just for a single VS code project?
+If this completes, you should find the `libDaisySP.a` static library in the root DaisySP folder, which we will link to when compiling our VCV Rack plugin.
 
 # Building the Plugin
 
-Now we are ready to ahead and build the plugin. In your project folder, clone this repo as follows:
+Now we are ready to ahead and build the plugin. Back up in your top level folder, clone this repo as follows:
 
 `git clone https://github.com/fablabnk/VaseProtoPlugin.git`
 
@@ -67,21 +46,35 @@ Your folder structure should now look like this:
 └── VaseProtoPlugin
 ```
 
-Now you can go ahead an try to build...
+Go into the VaseProtoPlugin folder, edit the Makefile and provoide the correct paths to our previously downloaded tools, which should be:
 
 ```
-cd VaseProtoPlugin
+RACK_DIR ?= ../Rack-SDK
+DAISYSP_DIR = ../DaisySP
+```
+
+Also note that the LDFLAGS line is linking to our previously created `libDaisySP.a` file, where `-L` points it at the right folder, whilst `-l` tells us the name of the library to look for (`DaisySP` will repsolve to `libDaisySP.a`).
+
+```
+LDFLAGS += -L$(DAISYSP_DIR)/ -lDaisySP
+```
+
+Now you can go ahead and build like so:
+
+```
 make
 make dist
 make install
 ```
 
-Here, `make` builds the plugin, `make dist` makes a distributable version and `make install` places it in your VCV Rack plugins folder in ~/.Rack2
+Here, `make` builds the plugin, `make dist` makes a distributable version and `make install` places it in your VCV Rack plugins folder in ~/.Rack2. When running `make`, some warnings are normal.
 
-# Things still to improve
+Once this is done you should be able to open VCVRack, right click and see and use your plugin. If your plugin does not appear, check `~/.Rack2/logs.txt` for errors.
 
-- scratchy audio in VCV Rack (sometimes fixes itself)
-- the compilation processes builds a lot more stuff that it needs to, so it's slow - optimise it
+# Things to note
+
+- When you build your plugin, an extra DaisySP folder will be created with object and dependency files in it - this is normal. The plugin Makefile has the target `clean_extra` to clean it up whilst still calling the original `clean` target
+- If you have scratchy audio in VCV Rack using Ubuntu, use PulseAudio instead of ALSA
 
 # Technical details: What I updated to make it work
 
@@ -105,3 +98,7 @@ LDFLAGS += -L$(DAISYSP_DIR)/build # -ldaisysp
 SOURCES += ${wildcard $(DAISYSP_DIR)/Source/**/*.cpp}
 ```
 
+# Useful links
+
+This link helped me to realise that I don't have to build DaisySP for arm:
+https://forum.electro-smith.com/t/daisysp-away-from-the-hardware-aka-plugins-with-juce/1106

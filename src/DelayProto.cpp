@@ -1,9 +1,9 @@
-// TODO: limit feedback to 0.75?
 // TODO: delay parameter knob should show correct delay time whether set to long or short by switch
 // TODO: derive the sample rate from VCV Rack rather than hard coding it (to 48000)
 // TODO: figure out why auto panel generation didn't work
+// TODO: turn LED on when switch is set to 1
 
-#include <iostream>
+// #include <iostream> // for std::cout
 #include "plugin.hpp"
 #include "daisysp.h"
 
@@ -13,6 +13,7 @@
 #define MIN_LONG_DELAY_TIME 0.5f
 #define MAX_LONG_DELAY_TIME 5.0f
 #define MAX_DELAY static_cast<size_t>(SAMPLE_RATE * MAX_LONG_DELAY_TIME)
+#define MAX_FEEDBACK 0.75f
 
 // clamp function
 template<typename T>
@@ -59,8 +60,8 @@ struct DelayProto : Module {
 		float minDelayTimeSecs, maxDelayTimeSecs;
 
 		// Parameter 1: Delay Time (secs)
-		float paramOne = params[DELAY_TIME_PARAM].getValue() + (inputs[DELAY_TIME_CV_INPUT].getVoltage() / 5.0f);
-		float clampedParamOne = clamp(paramOne, 0.f, 1.f);
+		float delayTimeParam = params[DELAY_TIME_PARAM].getValue() + (inputs[DELAY_TIME_CV_INPUT].getVoltage() / 5.0f);
+		float clampedDelayTimeParam = clamp(delayTimeParam, 0.f, 1.f);
 
 		// Choose min and max delay times based on position of switch
 		if (params[SWITCH_PARAM].getValue() == 0)
@@ -75,7 +76,7 @@ struct DelayProto : Module {
 		}
 		
 		float rangeDelayTimeSecs = maxDelayTimeSecs - minDelayTimeSecs;
-		float delayTime = (clampedParamOne * rangeDelayTimeSecs) + minDelayTimeSecs;
+		float delayTime = (clampedDelayTimeParam * rangeDelayTimeSecs) + minDelayTimeSecs;
 
 		// smoothing quick changes between delay times
 		float smoothedDelayTime;
@@ -88,9 +89,9 @@ struct DelayProto : Module {
         sig_out  = del_out + inputs[AUDIO_INPUT].getVoltage();
 
 		// Parameter 2: Feedback
-		float paramTwo = params[FEEDBACK_PARAM].getValue() + (inputs[FEEDBACK_CV_INPUT].getVoltage() / 5.0f);
-		float clampedParamTwo = clamp(paramTwo, 0.f, 1.f);
-        feedback = (del_out * clampedParamTwo) + inputs[AUDIO_INPUT].getVoltage();
+		float feedbackParam = params[FEEDBACK_PARAM].getValue() + (inputs[FEEDBACK_CV_INPUT].getVoltage() / 5.0f);
+		float clampedFeedbackParam = clamp(feedbackParam, 0.f, 1.f);
+        feedback = (del_out * clampedFeedbackParam * MAX_FEEDBACK) + inputs[AUDIO_INPUT].getVoltage();
         del.Write(feedback);
 
 		outputs[AUDIO_OUTPUT].setVoltage(sig_out);

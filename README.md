@@ -1,6 +1,16 @@
 # Explanation
 
-This is a simple delay line with two parameters (delay time and feedback) plus associated CV inputs, built as a plugin for VCVRack using the DaisySP library.
+This is a simple delay line built as a plugin for VCVRack using the DaisySP library
+
+![DaisyDelay](https://github.com/fablabnk/VaseProtoPlugin/blob/delay_line_params/res/DelayProto.svg)
+
+It's controls are:
+
+- Two parameters:delay time and feedback)
+- A switch that sets the delay range (short up to 0.5secs or long up to 5 secs)
+- an LED (that currently does nothing)
+- CV inputs for the two parameters
+- Audio In and Out
 
 See [here](https://github.com/fablabnk/VaseProtoPlugin/tree/delay_line) for version 1, with more notes and without parameters
 

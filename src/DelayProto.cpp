@@ -1,7 +1,6 @@
 // TODO: delay parameter knob should show correct delay time whether set to long or short by switch
 // TODO: derive the sample rate from VCV Rack rather than hard coding it (to 48000)
 // TODO: figure out why auto panel generation didn't work
-// TODO: turn LED on when switch is set to 1
 
 // #include <iostream> // for std::cout
 #include "plugin.hpp"
@@ -47,7 +46,7 @@ struct DelayProto : Module {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configParam(DELAY_TIME_PARAM, 0.f, 1.f, 1.f, "Delay Time", "secs", MIN_LONG_DELAY_TIME, MAX_LONG_DELAY_TIME);
 		configParam(FEEDBACK_PARAM, 0.f, 1.f, 1.f, "Feedback");
-		configSwitch(SWITCH_PARAM, 0.f, 1.f, 1.f, "Delay Length", {"Short", "Long"});
+		configSwitch(SWITCH_PARAM, 0.f, 1.f, 0.f, "Delay Length", {"Short", "Long"});
 		configLight(LED, "");
 		configInput(DELAY_TIME_CV_INPUT, "Delay Time CV");
 		configInput(FEEDBACK_CV_INPUT, "Feedback CV");
@@ -66,11 +65,13 @@ struct DelayProto : Module {
 		// Choose min and max delay times based on position of switch
 		if (params[SWITCH_PARAM].getValue() == 0)
 		{
+			lights[LED].setBrightness(0);
 			minDelayTimeSecs = MIN_SHORT_DELAY_TIME;
 			maxDelayTimeSecs = MAX_SHORT_DELAY_TIME;
 		}
 		else
 		{
+			lights[LED].setBrightness(1);
 			minDelayTimeSecs = MIN_LONG_DELAY_TIME;
 			maxDelayTimeSecs = MAX_LONG_DELAY_TIME;
 		}

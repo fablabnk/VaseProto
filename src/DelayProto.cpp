@@ -1,0 +1,125 @@
+// TODO: limit feedback to 0.75?
+// TODO: delay parameter knob should show correct delay time whether set to long or short by switch
+// TODO: derive the sample rate from VCV Rack rather than hard coding it (to 48000)
+// TODO: figure out why auto panel generation didn't work
+
+#include <iostream>
+#include "plugin.hpp"
+#include "daisysp.h"
+
+#define SAMPLE_RATE 48000
+#define MIN_SHORT_DELAY_TIME 0.1f
+#define MAX_SHORT_DELAY_TIME 1.0f
+#define MIN_LONG_DELAY_TIME 0.5f
+#define MAX_LONG_DELAY_TIME 5.0f
+#define MAX_DELAY static_cast<size_t>(SAMPLE_RATE * MAX_LONG_DELAY_TIME)
+
+// clamp function
+template<typename T>
+const T& clamp(const T& value, const T& low, const T& high) {
+    return (value < low) ? low : (value > high) ? high : value;
+}
+
+struct DelayProto : Module {
+	enum ParamId {
+		DELAY_TIME_PARAM,
+		FEEDBACK_PARAM,
+		SWITCH_PARAM,
+		PARAMS_LEN
+	};
+	enum InputId {
+		DELAY_TIME_CV_INPUT,
+		FEEDBACK_CV_INPUT,
+		AUDIO_INPUT,
+		INPUTS_LEN
+	};
+	enum OutputId {
+		AUDIO_OUTPUT,
+		OUTPUTS_LEN
+	};
+	enum LightId {
+		LED,
+		LIGHTS_LEN
+	};
+
+	DelayProto() {
+		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
+		configParam(DELAY_TIME_PARAM, 0.f, 1.f, 1.f, "Delay Time", "secs", MIN_LONG_DELAY_TIME, MAX_LONG_DELAY_TIME);
+		configParam(FEEDBACK_PARAM, 0.f, 1.f, 1.f, "Feedback");
+		configSwitch(SWITCH_PARAM, 0.f, 1.f, 1.f, "Delay Length", {"Short", "Long"});
+		configLight(LED, "");
+		configInput(DELAY_TIME_CV_INPUT, "Delay Time CV");
+		configInput(FEEDBACK_CV_INPUT, "Feedback CV");
+		configInput(AUDIO_INPUT, "Audio");
+		configOutput(AUDIO_OUTPUT, "Audio");
+	}
+
+	void process(const ProcessArgs& args) override {
+		float feedback, del_out, sig_out;
+		float minDelayTimeSecs, maxDelayTimeSecs;
+
+		// Parameter 1: Delay Time (secs)
+		float paramOne = params[DELAY_TIME_PARAM].getValue() + (inputs[DELAY_TIME_CV_INPUT].getVoltage() / 5.0f);
+		float clampedParamOne = clamp(paramOne, 0.f, 1.f);
+
+		// Choose min and max delay times based on position of switch
+		if (params[SWITCH_PARAM].getValue() == 0)
+		{
+			minDelayTimeSecs = MIN_SHORT_DELAY_TIME;
+			maxDelayTimeSecs = MAX_SHORT_DELAY_TIME;
+		}
+		else
+		{
+			minDelayTimeSecs = MIN_LONG_DELAY_TIME;
+			maxDelayTimeSecs = MAX_LONG_DELAY_TIME;
+		}
+		
+		float rangeDelayTimeSecs = maxDelayTimeSecs - minDelayTimeSecs;
+		float delayTime = (clampedParamOne * rangeDelayTimeSecs) + minDelayTimeSecs;
+
+		// smoothing quick changes between delay times
+		float smoothedDelayTime;
+		float coeff = 1.0f / (2.5f * SAMPLE_RATE);
+		daisysp::fonepole(smoothedDelayTime, delayTime, coeff); 
+		
+		del.SetDelay(SAMPLE_RATE * delayTime);
+
+        del_out = del.Read();
+        sig_out  = del_out + inputs[AUDIO_INPUT].getVoltage();
+
+		// Parameter 2: Feedback
+		float paramTwo = params[FEEDBACK_PARAM].getValue() + (inputs[FEEDBACK_CV_INPUT].getVoltage() / 5.0f);
+		float clampedParamTwo = clamp(paramTwo, 0.f, 1.f);
+        feedback = (del_out * clampedParamTwo) + inputs[AUDIO_INPUT].getVoltage();
+        del.Write(feedback);
+
+		outputs[AUDIO_OUTPUT].setVoltage(sig_out);
+	}
+	daisysp::DelayLine<float, MAX_DELAY> del;
+};
+
+struct DelayProtoWidget : ModuleWidget {
+	DelayProtoWidget(DelayProto* module) {
+		setModule(module);
+		//setPanel(createPanel(asset::plugin(pluginInstance, "res/DelayProto.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DelayProto.svg")));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(12.646, 26.755)), module, DelayProto::DELAY_TIME_PARAM));
+		addParam(createParamCentered<RoundLargeBlackKnob>(mm2px(Vec(12.646, 56.388)), module, DelayProto::FEEDBACK_PARAM));
+
+		addParam(createParamCentered<BefacoSwitch>(mm2px(Vec(7.297, 80.603)), module, DelayProto::SWITCH_PARAM));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(18.134, 80.603)), module, DelayProto::LED));
+
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.297, 96.859)), module, DelayProto::DELAY_TIME_CV_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(18.134, 96.859)), module, DelayProto::FEEDBACK_CV_INPUT));
+
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.297, 113.115)), module, DelayProto::AUDIO_INPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(18.134, 113.115)), module, DelayProto::AUDIO_OUTPUT));
+	}
+};
+
+Model* modelDelayProto = createModel<DelayProto, DelayProtoWidget>("DelayProto");

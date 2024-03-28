@@ -9,13 +9,6 @@ See [here](https://github.com/fablabnk/VaseProtoPlugin/tree/delay_line) for vers
 
 I added a convenience target to the Makefile `make plugin` which does `make`, `make dist` and `make install` together.
 
-# Still To Do
-
-- figure out why auto panel generation didn't work 
-- implement delay-time switch
-- smooth knob values (i.e. delay time over a period of 0.5 seconds)
-- how to derive the sample rate from VCV Rack rather than hard coding it (to 48000)
-
 # Things I learned building this module...
 
 ## Plugin Element Categories
@@ -129,7 +122,7 @@ Output appears in terminal from where I'm running `./Rack`. Note: You might not 
 
 ## Components can be given 'hoverable' tooltip labels
 
-In DelayParamsProto(), we call various config functions, each of which ends with a string which is the tooltip text e.g.
+In DelayProto(), we call various config functions, each of which ends with a string which is the tooltip text e.g.
 ```
 configParam(PARAM_ONE_PARAM, 0.f, 1.f, 1.f, "Delay Time");
 ```

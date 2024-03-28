@@ -1,6 +1,6 @@
-// TODO: delay parameter knob should show correct delay time whether set to long or short by switch
 // TODO: derive the sample rate from VCV Rack rather than hard coding it (to 48000)
 // TODO: figure out why auto panel generation didn't work
+// TODO: interpolation between delay time positions doesn't really work (zipper noise remains)
 
 // #include <iostream> // for std::cout
 #include "plugin.hpp"
@@ -44,7 +44,10 @@ struct DelayProto : Module {
 
 	DelayProto() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(DELAY_TIME_PARAM, 0.f, 1.f, 1.f, "Delay Time", "secs", MIN_LONG_DELAY_TIME, MAX_LONG_DELAY_TIME);
+		float displayBase = 0.0f;
+		float displayMultiplier = MAX_SHORT_DELAY_TIME - MIN_SHORT_DELAY_TIME;
+		float displayOffset = MIN_SHORT_DELAY_TIME;
+		configParam(DELAY_TIME_PARAM, 0.f, 1.f, 0.f, "Delay Time", " secs", displayBase, displayMultiplier, displayOffset);
 		configParam(FEEDBACK_PARAM, 0.f, 1.f, 1.f, "Feedback");
 		configSwitch(SWITCH_PARAM, 0.f, 1.f, 0.f, "Delay Length", {"Short", "Long"});
 		configLight(LED, "");
@@ -66,12 +69,16 @@ struct DelayProto : Module {
 		if (params[SWITCH_PARAM].getValue() == 0)
 		{
 			lights[LED].setBrightness(0);
+			paramQuantities[DELAY_TIME_PARAM]->displayMultiplier = MAX_SHORT_DELAY_TIME - MIN_SHORT_DELAY_TIME;
+			paramQuantities[DELAY_TIME_PARAM]->displayOffset = MIN_SHORT_DELAY_TIME;
 			minDelayTimeSecs = MIN_SHORT_DELAY_TIME;
 			maxDelayTimeSecs = MAX_SHORT_DELAY_TIME;
 		}
 		else
 		{
 			lights[LED].setBrightness(1);
+			paramQuantities[DELAY_TIME_PARAM]->displayMultiplier = MAX_LONG_DELAY_TIME - MIN_LONG_DELAY_TIME;
+			paramQuantities[DELAY_TIME_PARAM]->displayOffset = MIN_LONG_DELAY_TIME;
 			minDelayTimeSecs = MIN_LONG_DELAY_TIME;
 			maxDelayTimeSecs = MAX_LONG_DELAY_TIME;
 		}
@@ -81,10 +88,10 @@ struct DelayProto : Module {
 
 		// smoothing quick changes between delay times
 		float smoothedDelayTime;
-		float coeff = 1.0f / (2.5f * SAMPLE_RATE);
+		float coeff = 1.0f / (2.5f * args.sampleRate);
 		daisysp::fonepole(smoothedDelayTime, delayTime, coeff); 
 		
-		del.SetDelay(SAMPLE_RATE * delayTime);
+		del.SetDelay(args.sampleRate * delayTime);
 
         del_out = del.Read();
         sig_out  = del_out + inputs[AUDIO_INPUT].getVoltage();
@@ -97,6 +104,7 @@ struct DelayProto : Module {
 
 		outputs[AUDIO_OUTPUT].setVoltage(sig_out);
 	}
+	// APP->engine->getSampleRate() // I can get the sampleRate like this but still can't use it to instantiate the delay line below
 	daisysp::DelayLine<float, MAX_DELAY> del;
 };
 
